@@ -50,4 +50,4 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
 Con `main:app` estamos indicandole a Uvicorn que la instancia que debe alojar es la que está guardada bajo la variable `app` en el fichero `main.py`. Con `--host 0.0.0.0` estamos declarando que el servidor se ha de ejecutar en el mismo ordenador en el que se ha ejecutado el comando. Por último definimos el puerto por el que podemos comunicarnos con el servidor utilizando `--port 8000` y marcamos `--reload` para que el servidor se reinicie cada vez que detecte algún cambio en nuestro código.
 
-Una vez ejecutado el comando, podemos navegar utilizando nustro navegador preferido a [localhost](http://0.0.0.0:8000/) y veremos una resupuesta que diga {"Hola":"Mundo"}.
+Una vez ejecutado el comando, podemos navegar utilizando nustro navegador preferido a [localhost](http://0.0.0.0:8000/) y veremos una resupuesta que diga `{"Hola":"Mundo"}`.
