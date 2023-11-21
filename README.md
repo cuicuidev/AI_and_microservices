@@ -145,3 +145,60 @@ Ahora bajo la variable `diccionario_persona` tenemos un diccionario de Python qu
     ]
 }
 ```
+
+## API
+
+Ahora que hemos visto cómo trabajar con Pydantic, podemos proceder a desarrollar nuestra API. Para esto voy a utilizar un modelo RandomForestRegressor de Scikit Learn que ya está entrenado. Este modelo predice los precios de viviendas en Madrid y necesita una multitud de parámetros:
+- Latitud
+- Longitud
+- Superficie construida
+- Número de baños
+- Número de habitaciones
+- Si tiene o no un jardín
+- Antigüedad de la vivienda
+- Superficie útil
+- Si tiene o no un ascensor
+- Si tiene o no un garaje
+- Condición de la vivienda
+
+Con toda esta cantidad de variables, cada una de un tipo diferente, conviene tener un formato estandarizado que no de lugar a errores. A continuación pueden ver la implementación de los modelos de Pydantic para estructurar los datos que va a recibir el endpoint de nuestra API y la predicción que va a retornar.
+
+```py
+from enum import Enum
+from pydantic import BaseModel
+
+class Condition(str, Enum):
+    a_reformar = ' A reformar'
+    reformado = ' Reformado'
+    a_estrenar = ' A estrenar'
+    en_buen_estado = ' En buen estado'
+
+class RequestForm(BaseModel):
+    lat: float
+    lng: float
+    surface_m2: float
+    n_bathrooms: int
+    n_rooms: int
+    garden: bool
+    age_years: float
+    net_surface_m2: float
+    elevator: bool
+    garage: bool
+    condition: Condition
+
+class Prediction(BaseModel):
+    price: float
+    timestamp: int
+```
+
+Ahora podemos crear el endpoint de nuestra API. Para poder recibir los datos, utilizaremos el método HTTP post. La gracia de que FastAPI esté construido sobre Pydantic es que podemos especificar nuestros modelos como parámetros de las funciones y FastAPI se encargará de deserializar la cadena JSON que recibimos y convertirla en ese modelo. De esta manera, estaremos validando los datos al recibirlos sin tener que hacer nada nosotros mismos.
+
+```py
+@app.post('/predict')
+async def predict_route(request_form: RequestForm) -> Prediction:
+    pass
+```
+
+Aquí ponemos en práctica un _type hint_ que no hemos visto anteriormente. Con `->` podemos señalar qué tipo de variable retornará la función.
+
+Vamos a terminar de construir la función. Lo primero que debemos hacer es extraer los valores de los diferentes campos que tiene el formulario de la request. 
