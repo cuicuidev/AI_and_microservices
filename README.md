@@ -17,24 +17,20 @@ En una aplicación centrada en la IA, muchos de los recursos de un servidor se p
 Sin más dilación, ¡vamos allá!
 
 ## Prerequisitos
-Antes que nada, vamos a crear un repositorio y un entorno virtual para trabajar. Esto es opcional, pero recomendado.
-```sh
-mkdir tutorial_fastapi
-cd tutorial_fastapi
-git init
-```
-
+Antes que nada, vamos a crear un entorno virtual para trabajar. Esto es opcional, pero recomendado.
 ```sh
 python -m venv venv
-source venv/bin/activate
 ```
-Ahora debemos instalar FastAPI. Para ello, utilizaremos pip:
+
+Para activar el entorno, ejecutamos el siguiente comando:
+```sh
+source venv/bin/activate # linux
+. 'C:\<directorio del repo>\venv\Scripts\Activate.ps1' # powershell
+```
+
+Ahora podemos instalar FastAPI. Para ello utilizaremos el administrador de paquetes de Python:
 ```sh
 pip install fastapi
-```
-Además de eso, por motivos de demostración, vamos a instalar también las librerías de Scikit Learn y Pandas, pero pueden utilizar cualquier otra librería de machine learning o deep learning que necesiten:
-```sh
-pip install scikit-learn pandas
 ```
 
 Podemos crear nuestra primera API en un archivo `main.py` de la siguiente manera:
@@ -52,3 +48,6 @@ Listo, ya tenemos una API. Podemos comprobar si todo funciona correctamente ejec
 ```sh
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
+Con `main:app` estamos indicandole a Uvicorn que la instancia que debe alojar es la que está guardada bajo la variable `app` en el fichero `main.py`. Con `--host 0.0.0.0` estamos declarando que el servidor se ha de ejecutar en el mismo ordenador en el que se ha ejecutado el comando. Por último definimos el puerto por el que podemos comunicarnos con el servidor utilizando `--port 8000` y marcamos `--reload` para que el servidor se reinicie cada vez que detecte algún cambio en nuestro código.
+
+Una vez ejecutado el comando, podemos navegar utilizando nustro navegador preferido a [localhost](http://0.0.0.0:8000/) y veremos una resupuesta que diga {"Hola":"Mundo"}.
