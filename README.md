@@ -593,3 +593,5 @@ if __name__ == '__main__':
 ```
 
 Ahora tenemos dos repositorios separados, uno con el frontend en Streamlit, y otro con el backend utilizando FastAPI. Lo bueno de esto es que no estamos atados a Streamlit, ya que de la misma manera puede un desarrollador de React utilizar nuestra API en su página web y un desarrollador de Flutter en su aplicación Android. Ahora este modelo se puede integrar fácilmente en aplicaciones más complejas, donde por ejemplo solo ciertos usuarios que pagan una subscripción pueden utilizar este servicio. Las posibilidades son infinitas.
+
+## AWS Lambda
