@@ -208,6 +208,8 @@ class Prediccion(BaseModel):
     timestamp: float
 ```
 
+Hemos creado un modelo Formulario que contiene todos los campos que necesita el modelo de IA. El campo de la condición del formulario es un enum que hemos creado ya que solamente puede contener esos valores concretos y no cualquier cadena. Por último tenemos el modelo de Prediccion que contiene el precio y un timestamp de cuándo se ha hecho la request.
+
 Ahora podemos crear el endpoint de nuestra API. Para poder recibir los datos, utilizaremos el método HTTP post. La gracia de que FastAPI esté construido sobre Pydantic es que podemos especificar nuestros modelos como parámetros de las funciones y FastAPI se encargará de deserializar la cadena JSON que recibimos y convertirla en ese modelo. De esta manera, estaremos validando los datos al recibirlos sin tener que hacer nada nosotros mismos. Tras la validación, podemos hacer .model_dump() y trabajar con los datos de la manera que nos sea más conveniente.
 
 ```py
@@ -216,7 +218,7 @@ async def ruta_prediccion(formulario: Formulario) -> Prediccion:
     pass
 ```
 
-Aquí ponemos en práctica un _type hint_ que no hemos visto anteriormente. Con `->` podemos señalar qué tipo de variable retornará la función, en este caso un modelo de pydantic que creamos llamado Prediccion.
+Aquí ponemos en práctica un _type hint_ que no hemos visto anteriormente. Con `->` podemos señalar qué tipo de variable retornará la función, en este caso un modelo Prediccion.
 
 Vamos a terminar de construir la función. Lo primero que debemos hacer es extraer los valores de los diferentes campos que tiene el formulario de la request. Tenemos que recordar que, para las predicciones, el modelo debe recibir los datos en el mismo orden en el que los fue recibiendo al entrenar. En nuestro caso, el orden es igual al orden en el que hemos declarado los campos del modelo en la clase Formulario. Partiendo de ahí, podemos construir una lista con los valores de cada campo respetando ese mismo orden. Para hacerlo utilizaremos la función nativa de Python `getattr(instance, field)` y la propiedad `BaseModel().model_fields`. La función `getattr()` recibe una instancia y un campo de una clase, y devuelve el valor de ese campo. Por otro lado, `BaseModel().model_fields` retorna un iterable con todos los campos de una clase en el mismo orden en el que se declararon. 
 
@@ -331,7 +333,7 @@ Podemos crear más endpoints, todos los que queramos. Por ejemplo, podemos tener
 ## Contenedorización
 Si queremos desplegar nuestra API en la nube de una manera sencilla y sin preocuparnos por las dependencias, versiones y el entorno, una solución es utilizar Docker para encapsular nuestra API. Para ello, debemos tener Docker instalado en nuestro ordenador. Si estamos usando Windows, debemos tener ademas instalado el Linux Subsistem for Windows (LSW). Para instalar docker, pueden seguir las instrucciones de instalación en su [página web](https://docs.docker.com/engine/install/).
 
-Una vez instalado, procedemos a crear una imágen con nuestra API. Para ello, creamos un archivo `Dockerfile` sin extensión y con la primera letra mayúscula. Dentro, vamos a definir lo que necesitamos para ejecutar correctamente la API. Para nuestro caso, vamos a utilizar el siguiente Dockerfile:
+Una vez instalado, procedemos a crear una imagen con nuestra API. Para ello, creamos un archivo `Dockerfile` sin extensión y con la primera letra mayúscula. Dentro, vamos a definir lo que necesitamos para ejecutar correctamente la API. Para nuestro caso, vamos a utilizar el siguiente Dockerfile:
 
 ```Dockerfile
 FROM python:3.10-alpine
@@ -356,22 +358,26 @@ EXPOSE 8000
 CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port 8000 --reload"]
 ```
 
-Vamos a ir paso por paso para entender qué está pasando en este archivo. En primer lugar, estamos definiendo la imágen base con la palabra FROM. Esta imágen contiene todo lo necesario para construir un sistema operativo Alpine con Python 3.10 instalado:
+Vamos a ir paso por paso para entender qué está pasando en este archivo. En primer lugar, estamos definiendo la imagen base con la palabra FROM. Esta imágen contiene todo lo necesario para construir un sistema operativo Alpine con Python 3.10 instalado:
 
 ```Dockerfile
 FROM python:3.10-alpine
 ```
 
-Podemos utilizar otros sistemas operativos y otras versiones de Python, todo lo que tenemos que hacer es explorar en [dockerhub]() las imágenes que nos interesen.
+Podemos utilizar otros sistemas operativos y otras versiones de Python, todo lo que tenemos que hacer es explorar en [dockerhub](https://hub.docker.com/) las imágenes que nos interesen.
 
-Lo siguiente que estamos definiendo es un directorio `/app`. Con el comando `WORKDIR` estamos creando ese directorio y estamos navegando hacia él para trabajar dentro. Esto es opcional para una imágen tan sencilla como esta, pero recomendable hacerlo siempre para tener buenas prácticas:
+Lo siguiente que estamos definiendo es un directorio `/app`. Con el comando `WORKDIR` estamos creando ese directorio y estamos navegando hacia él para trabajar dentro. Esto es opcional para una imagen tan sencilla como esta, pero recomendable hacerlo siempre para tener buenas prácticas:
 
 ```Dockerfile
 FROM python:3.10-alpine
 
 WORKDIR /api
 ```
+Antes de proceder con el resto del Dockerfile, vamos a guardar todas las dependencias de nuestra API en un archivo `requirements.txt`:
 
+```sh
+pip freeze > requirements.txt
+```
 Ahora copiamos los contenidos del archivo `requirements.txt` que creamos antes a `.`, que es nuestro workdir:
 
 ```Dockerfile
@@ -439,14 +445,14 @@ RUN pip install uvicorn
 COPY . .
 ```
 
-Si hay alguna carpeta o archivo que no queremos guardar en la imágen, por ejemplo nuestro entorno virtual `venv`, podemos añadirlos a un archivo `.dockerignrore`:
+Si hay alguna carpeta o archivo que no queremos guardar en la imagen, por ejemplo nuestro entorno virtual `venv`, podemos añadirlos a un archivo `.dockerignrore`:
 
 ```.dockerignore
 /venv/
 __pycache__/
 ```
 
-Una vez todo lo necesario está dentro de la imágen, abrimos el puerto 8000, que es por el que se comunica Uvicorn cuando ejecutamos nuestro servidor:
+Una vez todo lo necesario está dentro de la imagen, abrimos el puerto 8000, que es por el que se comunica Uvicorn cuando ejecutamos nuestro servidor:
 
 ```Dockerfile
 FROM python:3.10-alpine
@@ -494,21 +500,21 @@ EXPOSE 8000
 CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port 8000 --reload"]
 ```
 
-Para comprobar que todo funciona correctamente, debemos construir la imágen a partir de Dockerfile y luego instancializar un contenedor. La imágen se construye con el siguiente comando:
+Para comprobar que todo funciona correctamente, debemos construir la imagen a partir de Dockerfile y luego instancializar un contenedor. La imagen se construye con el siguiente comando:
 
 ```sh
 docker build -t api .
 ```
 
-Donde `-t api` nos sirve para especificar el nombre de la imágen y el `.` especifica el directorio en el que se encuentra el Dockerfile.
+Donde `-t api` nos sirve para especificar el nombre de la imagen y el `.` especifica el directorio en el que se encuentra el Dockerfile.
 
-Para instancializar un contenedor a partir de la imágen, ejecutamos:
+Para instancializar un contenedor a partir de la imagen, ejecutamos:
 
 ```sh
 docker run -p 8000:8000 api
 ```
 
-Con `-p 8000:8000` estamos diciendo que vamos a enlazar el puerto 8000 del contenedor al puerto 8000 de nuestro ordenador. Esto nos permite comunicarnos con el contenedor de manera directa. Luego, `api` es simplemente el nombre de la imágen que hemos creado.
+Con `-p 8000:8000` estamos diciendo que vamos a enlazar el puerto 8000 del contenedor al puerto 8000 de nuestro ordenador. Esto nos permite comunicarnos con el contenedor de manera directa. Luego, `api` es simplemente el nombre de la imagen que hemos creado.
 
 Si entramos a http://localhost:8000/, podremos ver nuestra API en funcionamiento. Y así, con un poco de esfuerzo, hemos convertido un modelo de Scikit Learn en un software que cualquier desarrollador puede integrar en su aplicación con mínimo esfuerzo. Veamos como podemos utilizarlo nosotros.
 
@@ -519,7 +525,7 @@ Ahora, con el contenedor corriendo en nuestro ordenador, podemos utilizar la lib
 pip install requests
 ```
 
-Digamos que estamos construyendo una aplicación de Streamlit en la que queremos aprovechar este modelo. Podemos pedir datos de la siguiente manera:
+Digamos que estamos construyendo una aplicación de Streamlit (`pip install streamlit`) en la que queremos aprovechar este modelo. Podemos pedir datos de la siguiente manera:
 
 ```py
 import streamlit as st
@@ -541,7 +547,7 @@ if __name__ == '__main__':
     main()
 ```
 
-Y ahora podemos crear un botón para hacer una request con esos datos a http:localhost:8000/predecir, o a otro enlace si por ejemplo decidimos alojar el modelo en la nube.
+Y ahora podemos crear un botón para hacer una request con esos datos a http://localhost:8000/predecir, o a otro enlace si por ejemplo decidimos alojar el modelo en la nube.
 
 ```py
 import requests
@@ -574,11 +580,13 @@ def main():
         "condicion" : condicion
     }
 
-    endpoint = "http://localhost:8000/predecir"
+    if st.button("Predecir Precio"):
 
-    response = requests.post(url = endpoint, data = data)
-
-    st.success(response.json())
+        endpoint = "http://localhost:8000/predecir"
+    
+        response = requests.post(url = endpoint, data = data)
+    
+        st.success(response.json())
     
 if __name__ == '__main__':
     main()
