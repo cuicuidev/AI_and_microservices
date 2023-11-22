@@ -1,2 +1,6 @@
 /venv/
 __pycache__/
+
+.gitignore
+example.py
+example.json
