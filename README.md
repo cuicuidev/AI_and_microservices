@@ -219,7 +219,7 @@ Vamos a terminar de construir la función. Lo primero que debemos hacer es extra
 ```py
 @app.post('/predecir')
 async def ruta_prediccion(formulario: Formulario) -> Prediccion:
-    valores_ordenados = [getattr(formulario, campo) for campo in formulario.__fields__]
+    valores_ordenados = [getattr(formulario, campo) for campo in formulario.model_fields]
 ```
 
 Ahora podemos cargar nuestro modelo:
@@ -248,7 +248,7 @@ Volvemos a nuestra función de ruta y cargamos el modelo junto a los encodings:
 ```py
 @app.post('/predecir')
 async def ruta_prediccion(formulario: Formulario) -> Prediccion:
-    valores_ordenados = [getattr(formulario, campo) for campo in formulario.__fields__]
+    valores_ordenados = [getattr(formulario, campo) for campo in formulario.model_fields]
 
     modelo = cargar_modelo()
     encodings = cargar_encodings()
@@ -259,7 +259,7 @@ Ahora podemos cambiar el valor de la condición por un valor numérico:
 ```py
 @app.post('/predecir')
 async def ruta_prediccion(formulario: Formulario) -> Prediccion:
-    valores_ordenados = [getattr(formulario, campo) for campo in formulario.__fields__]
+    valores_ordenados = [getattr(formulario, campo) for campo in formulario.model_fields]
 
     modelo = cargar_modelo()
     encodings = cargar_encodings()
@@ -274,7 +274,7 @@ Por fin podemos hacer la predicción. Hay que recordar que los modelos de Scikit
 ```py
 @app.post('/predecir')
 async def ruta_prediccion(formulario: Formulario) -> Prediccion:
-    valores_ordenados = [getattr(formulario, campo) for campo in formulario.__fields__]
+    valores_ordenados = [getattr(formulario, campo) for campo in formulario.model_fields]
 
     modelo = cargar_modelo()
     encodings = cargar_encodings()
@@ -294,7 +294,7 @@ import datetime
 
 @app.post('/predecir')
 async def ruta_prediccion(formulario: Formulario) -> Prediccion:
-    valores_ordenados = [getattr(formulario, campo) for campo in formulario.__fields__]
+    valores_ordenados = [getattr(formulario, campo) for campo in formulario.model_fields]
 
     modelo = cargar_modelo()
     encodings = cargar_encodings()
