@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from enum import Enum
-from pprint import pprint
 import json
+
 class Especie(str, Enum):
     gato = 'Gato'
     perro = 'Perro'

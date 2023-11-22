@@ -36,6 +36,12 @@ Ahora podemos instalar FastAPI. Para ello utilizaremos el administrador de paque
 pip install fastapi
 ```
 
+Además de esto, vamos a necesitar Uvicorn para poder alojar nuestra API y Scikit Learn para poder utilizar el modelo que tenemos como ejemplo:
+
+```sh
+pip install uvicorn scikit-learn
+```
+
 Podemos crear nuestra primera API en un archivo `main.py` de la siguiente manera:
 
 ```py
@@ -48,7 +54,7 @@ async def root(): # definimos la función que se debe ejecutar cuando se realiza
     return {'Hola': 'Mundo'} # la respuesta que queremos retornar
 ```
 
-Listo, ya tenemos una API. Podemos comprobar si todo funciona correctamente instalando Uvicorn con `pip install uvicorn` y ejecutando el siguiente comando en nuestra terminal para desplegar el servidor de Uvicorn y yendo al puerto 8000 de localhost:
+Listo, ya tenemos una API. Podemos comprobar si todo funciona correctamente ejecutando el siguiente comando en nuestra terminal para desplegar el servidor de Uvicorn y yendo al puerto 8000 de localhost:
 
 ```sh
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
@@ -195,7 +201,7 @@ class Formulario(BaseModel):
 
 class Prediccion(BaseModel):
     precio: float
-    timestamp: int
+    timestamp: float
 ```
 
 Ahora podemos crear el endpoint de nuestra API. Para poder recibir los datos, utilizaremos el método HTTP post. La gracia de que FastAPI esté construido sobre Pydantic es que podemos especificar nuestros modelos como parámetros de las funciones y FastAPI se encargará de deserializar la cadena JSON que recibimos y convertirla en ese modelo. De esta manera, estaremos validando los datos al recibirlos sin tener que hacer nada nosotros mismos. Tras la validación, podemos hacer .model_dump() y trabajar con los datos de la manera que nos sea más conveniente.
@@ -208,7 +214,7 @@ async def ruta_prediccion(formulario: Formulario) -> Prediccion:
 
 Aquí ponemos en práctica un _type hint_ que no hemos visto anteriormente. Con `->` podemos señalar qué tipo de variable retornará la función, en este caso un modelo de pydantic que creamos llamado Prediccion.
 
-Vamos a terminar de construir la función. Lo primero que debemos hacer es extraer los valores de los diferentes campos que tiene el formulario de la request. Tenemos que recordar que, para las predicciones, el modelo debe recibir los datos en el mismo orden en el que los fue recibiendo al entrenar. En nuestro caso, el orden es igual al orden en el que hemos declarado los campos del modelo en la clase Formulario. Partiendo de ahí, podemos construir una lista con los valores de cada campo respetando ese mismo orden. Para hacerlo utilizaremos la función nativa de Python `getattr(instance, field)` y el método dunder ´.__fields__´. La función `getattr()` recibe una instancia y un campo de una clase, y devuelve el valor de ese campo. Por otro lado, `.__fields__` retorna un iterable con todos los campos de una clase en el mismo orden en el que se declararon. 
+Vamos a terminar de construir la función. Lo primero que debemos hacer es extraer los valores de los diferentes campos que tiene el formulario de la request. Tenemos que recordar que, para las predicciones, el modelo debe recibir los datos en el mismo orden en el que los fue recibiendo al entrenar. En nuestro caso, el orden es igual al orden en el que hemos declarado los campos del modelo en la clase Formulario. Partiendo de ahí, podemos construir una lista con los valores de cada campo respetando ese mismo orden. Para hacerlo utilizaremos la función nativa de Python `getattr(instance, field)` y la propiedad `BaseModel().model_fields`. La función `getattr()` recibe una instancia y un campo de una clase, y devuelve el valor de ese campo. Por otro lado, `BaseModel().model_fields` retorna un iterable con todos los campos de una clase en el mismo orden en el que se declararon. 
 
 ```py
 @app.post('/predecir')
@@ -308,8 +314,8 @@ Ya está listo nuestro endpoint. Ahora si hacemos una post request con los datos
 
 ```json
 {
-    "precio": 120000.3,
-    "timestamp": 1700659152
+    "precio": 158827.2,
+    "timestamp": 1700660949.076112
 }
 ```
 
