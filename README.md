@@ -414,12 +414,7 @@ RUN apk add --no-cache --virtual .build-deps \
 RUN pip install uvicorn
 ```
 
-Ahora que tenemos instaladas todas las dependencias, podemos copias los contenidos de nuestra API a la imágen. Si hay alguna carpeta o archivo que no queremos guardar en la imágen, por ejemplo nuestro entorno virtual `venv`, podemos añadirlos a un archivo `.dockerignrore`:
-
-```.dockerignore
-/venv/
-__pycache__/
-```
+Ahora que tenemos instaladas todas las dependencias, podemos copias los contenidos de nuestra API a la imágen:
 
 ```Dockerfile
 FROM python:3.10-alpine
@@ -438,6 +433,13 @@ RUN apk add --no-cache --virtual .build-deps \
 RUN pip install uvicorn
 
 COPY . .
+```
+
+Si hay alguna carpeta o archivo que no queremos guardar en la imágen, por ejemplo nuestro entorno virtual `venv`, podemos añadirlos a un archivo `.dockerignrore`:
+
+```.dockerignore
+/venv/
+__pycache__/
 ```
 
 Una vez todo lo necesario está dentro de la imágen, abrimos el puerto 8000, que es por el que se comunica Uvicorn cuando ejecutamos nuestro servidor:
