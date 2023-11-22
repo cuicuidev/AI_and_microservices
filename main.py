@@ -15,7 +15,7 @@ class Condicion(str, Enum):
 class Formulario(BaseModel):
     latitud: float
     longitud: float
-    surface: float
+    superficie_construida: float
     baños: int
     habitaciones: int
     jardin: bool

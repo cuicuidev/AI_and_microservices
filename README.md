@@ -189,7 +189,7 @@ class Condicion(str, Enum):
 class Formulario(BaseModel):
     latitud: float
     longitud: float
-    surface: float
+    superficie_construida: float
     baños: int
     habitaciones: int
     jardin: bool
@@ -506,10 +506,77 @@ docker run -p 8000:8000 api
 
 Con `-p 8000:8000` estamos diciendo que vamos a enlazar el puerto 8000 del contenedor al puerto 8000 de nuestro ordenador. Esto nos permite comunicarnos con el contenedor de manera directa. Luego, `api` es simplemente el nombre de la imágen que hemos creado.
 
-Ahora deberiamos poder entrar en http://localhost:8000/ y ver nuestra API en funcionamiento.
-
-## Despliegue
-- Usando Magnum y AWS Lambda
+Si entramos a http://localhost:8000/, podremos ver nuestra API en funcionamiento. Y así, con un poco de esfuerzo, hemos convertido un modelo de Scikit Learn en un software que cualquier desarrollador puede integrar en su aplicación con mínimo esfuerzo. Veamos como podemos utilizarlo nosotros.
 
 ## Uso
-- Una demostración de cómo se usaría el modelo desde el código utilizando la librería Requests de Python
+Ahora, con el contenedor corriendo en nuestro ordenador, podemos utilizar la librería requests para utilizar la API. Acuérdense de instalarla, pues no es un módulo nativo de Python:
+
+```sh
+pip install requests
+```
+
+Digamos que estamos construyendo una aplicación de Streamlit en la que queremos aprovechar este modelo. Podemos pedir datos de la siguiente manera:
+
+```py
+import streamlit as st
+
+def main():
+    latitud = st.number_input("Latitud")
+    longitud = st.number_input("Longitud")
+    superficie_construida = st.number_input("Superficie Construida")
+    baños = st.number_input("Baños")
+    habitaciones = st.number_input("Habitaciones")
+    jardin = st.checkbox("Jardín")
+    antiguedad = st.number_input("Antigüedad")
+    superficie_util = st.number_input("Superficie Útil")
+    ascensor = st.checkbox("Ascensor")
+    garaje = st.checkbox("Garaje")
+    condicion = st.selectbox("Condición", options=['A estrenar', 'En buen estado', 'Reformado', 'A reformar'], index=0)
+
+if __name__ == '__main__':
+    main()
+```
+
+Y ahora podemos crear un botón para hacer una request con esos datos a http:localhost:8000/predecir, o a otro enlace si por ejemplo decidimos alojar el modelo en la nube.
+
+```py
+import streamlit as st
+
+def main():
+    latitud = st.number_input("Latitud")
+    longitud = st.number_input("Longitud")
+    superficie_construida = st.number_input("Superficie Construida")
+    baños = st.number_input("Baños")
+    habitaciones = st.number_input("Habitaciones")
+    jardin = st.checkbox("Jardín")
+    antiguedad = st.number_input("Antigüedad")
+    superficie_util = st.number_input("Superficie Útil")
+    ascensor = st.checkbox("Ascensor")
+    garaje = st.checkbox("Garaje")
+    condicion = st.selectbox("Condición", options=['A estrenar', 'En buen estado', 'Reformado', 'A reformar'], index=0)
+
+    data = {
+        "latitud" : latitud,
+        "longitud" : longitud,
+        "superficie_construida" : superficie_construida,
+        "baños" : baños,
+        "habitaciones" : habitaciones,
+        "jardin" : jardin,
+        "antiguedad" : antiguedad,
+        "superficie_util" : superficie_util,
+        "ascensor" : ascensor,
+        "garaje" : garaje,
+        "condicion" : condicion
+    }
+
+    endpoint = "http://localhost:8000/predecir"
+
+    response = requests.post(url = endpoint, data = data)
+
+    st.success(response.json())
+    
+if __name__ == '__main__':
+    main()
+```
+
+Ahora tenemos dos repositorios separados, uno con el frontend en Streamlit, y otro con el backend utilizando FastAPI. Lo bueno de esto es que no estamos atados a Streamlit, ya que de la misma manera puede un desarrollador de React utilizar nuestra API en su página web y un desarrollador de Flutter en su aplicación Android. Ahora este modelo se puede integrar fácilmente en aplicaciones más complejas, donde por ejemplo solo ciertos usuarios que pagan una subscripción pueden utilizar este servicio. Las posibilidades son infinitas.
