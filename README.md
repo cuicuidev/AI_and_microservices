@@ -18,22 +18,26 @@ Sin más dilación, ¡vamos allá!
 
 ## Prerequisitos
 Antes que nada, vamos a crear un entorno virtual para trabajar. Esto es opcional, pero recomendado.
+
 ```sh
 python -m venv venv
 ```
 
 Para activar el entorno, ejecutamos el siguiente comando:
+
 ```sh
 source venv/bin/activate # linux
 . 'C:\<directorio del repo>\venv\Scripts\Activate.ps1' # powershell
 ```
 
 Ahora podemos instalar FastAPI. Para ello utilizaremos el administrador de paquetes de Python:
+
 ```sh
 pip install fastapi
 ```
 
 Podemos crear nuestra primera API en un archivo `main.py` de la siguiente manera:
+
 ```py
 from fastapi import FastAPI # importamos objeto FastAPI
 
@@ -45,12 +49,14 @@ async def root(): # definimos la función que se debe ejecutar cuando se realiza
 ```
 
 Listo, ya tenemos una API. Podemos comprobar si todo funciona correctamente instalando Uvicorn con `pip install uvicorn` y ejecutando el siguiente comando en nuestra terminal para desplegar el servidor de Uvicorn y yendo al puerto 8000 de localhost:
+
 ```sh
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 ```
+
 Con `main:app` estamos indicandole a Uvicorn que la instancia que debe alojar es la que está guardada bajo la variable `app` en el fichero `main.py`. Con `--host 0.0.0.0` estamos declarando que el servidor se ha de ejecutar en el mismo ordenador en el que se ha ejecutado el comando. Por último definimos el puerto por el que podemos comunicarnos con el servidor utilizando `--port 8000` y marcamos `--reload` para que el servidor se reinicie cada vez que detecte algún cambio en nuestro código.
 
-Una vez ejecutado el comando, podemos navegar utilizando nustro navegador preferido a [localhost](http://0.0.0.0:8000/) y veremos una resupuesta que diga `{"Hola":"Mundo"}`.
+Una vez ejecutado el comando, podemos navegar utilizando nustro navegador preferido a http://localhost:8000/ y veremos una resupuesta que diga `{"Hola":"Mundo"}`.
 
 ## Pydantic
 Uno de los puntos más fuertes de FastAPI en comparación con otros frameworks de desarrollo de APIs en Python es que está construido sobre Pydantic. Como muchos sabrán, Python es un lenguaje con tipado dinámico, esto quiere decir que cuando definimos alguna variable, no hace falta declarar el tipo de esa variable (si es una cadena, entero, flotante, etc.), sino que Python detecta automáticamente qué tipo es. Es más, podemos definir una variable `var = 42`, y más adelante en nuestro código darle un valor de un tipo completamente diferente: `var = "cuarenta y dos"`. Esto tiene sus cosas buenas, pero un problema que no podemos pasar por alto es que podemos encontrarnos con bugs completamente inesperados donde intentamos hacer acciones sobre una variable que creemos que es de un tipo, cuando en realidad la hemos sobreescrito con otro tipo en alguna parte de nuestro código sin darnos cuenta.
@@ -307,10 +313,15 @@ Ya está listo nuestro endpoint. Ahora si hacemos una post request con los datos
 }
 ```
 
-Podemos crear más endpoints. Por ejemplo, uno para predecir varias veces y otro para evaluar el modelo con un dataset de validación. Esto os lo dejo como ejercicio a vosotros.
+Pueden probar todos sus endpoints a través del endpoint http://localhost:8000/docs que proporciona FastAPI. Ahí tendréis una documentación de vuestra API generada a partir de vuestro código. Si aprovechan bien todas las funcionalidades de FastAPI y Pydantic, esta documentación estará muy completa y cualquiera que use vuestra API puede navegarla y no solo entender como funcionan los endpoints, sino probarlos ellos mismos.
+
+Podemos crear más endpoints, todos los que queramos. Por ejemplo, podemos tener uno para hacer predicciones en baches y otro para evaluar el modelo con un dataset de validación, pero esto lo dejo como ejercicio de práctica que deberán resolver por vuestra cuenta.
 
 ## Contenedorización
 - Crear imágen docker
 
 ## Despliegue
 - Usando Magnum y AWS Lambda
+
+## Uso
+- Una demostración de cómo se usaría el modelo desde el código utilizando la librería Requests de Python
