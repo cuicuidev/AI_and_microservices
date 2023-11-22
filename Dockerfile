@@ -4,6 +4,8 @@ WORKDIR /api
 
 COPY ./requirements.txt .
 
+RUN apk update && apk add g++
+
 RUN apk add --no-cache --virtual .build-deps \
         gcc \
         musl-dev && \

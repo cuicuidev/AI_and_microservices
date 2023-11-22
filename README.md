@@ -342,6 +342,8 @@ WORKDIR /api
 
 COPY ./requirements.txt .
 
+RUN apk update && apk add g++
+
 RUN apk add --no-cache --virtual .build-deps \
         gcc \
         musl-dev && \
@@ -388,7 +390,7 @@ WORKDIR /api
 COPY ./requirements.txt .
 ```
 
-A continuación ejecutamos un comando para actualizar el sistema operativo, agregar dependencias temporales e instalar todas las librerías que tenemos en `requirements.txt`:
+A continuación ejecutamos comandos para actualizar el sistema operativo, agregar dependencias temporales e instalar todas las librerías que tenemos en `requirements.txt`:
 
 ```Dockerfile
 FROM python:3.10-alpine
@@ -396,6 +398,8 @@ FROM python:3.10-alpine
 WORKDIR /api
 
 COPY ./requirements.txt .
+
+RUN apk update && apk add g++
 
 RUN apk add --no-cache --virtual .build-deps \
         gcc \
@@ -433,6 +437,8 @@ WORKDIR /api
 
 COPY ./requirements.txt .
 
+RUN apk update && apk add g++
+
 RUN apk add --no-cache --virtual .build-deps \
         gcc \
         musl-dev && \
@@ -461,6 +467,8 @@ WORKDIR /api
 
 COPY ./requirements.txt .
 
+RUN apk update && apk add g++
+
 RUN apk add --no-cache --virtual .build-deps \
         gcc \
         musl-dev && \
@@ -483,6 +491,8 @@ FROM python:3.10-alpine
 WORKDIR /api
 
 COPY ./requirements.txt .
+
+RUN apk update && apk add g++
 
 RUN apk add --no-cache --virtual .build-deps \
         gcc \
@@ -593,5 +603,3 @@ if __name__ == '__main__':
 ```
 
 Ahora tenemos dos repositorios separados, uno con el frontend en Streamlit, y otro con el backend utilizando FastAPI. Lo bueno de esto es que no estamos atados a Streamlit, ya que de la misma manera puede un desarrollador de React utilizar nuestra API en su página web y un desarrollador de Flutter en su aplicación Android. Ahora este modelo se puede integrar fácilmente en aplicaciones más complejas, donde por ejemplo solo ciertos usuarios que pagan una subscripción pueden utilizar este servicio. Las posibilidades son infinitas.
-
-## AWS Lambda
