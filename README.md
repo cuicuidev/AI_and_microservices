@@ -540,6 +540,7 @@ if __name__ == '__main__':
 Y ahora podemos crear un botón para hacer una request con esos datos a http:localhost:8000/predecir, o a otro enlace si por ejemplo decidimos alojar el modelo en la nube.
 
 ```py
+import requests
 import streamlit as st
 
 def main():
