@@ -325,7 +325,186 @@ Pueden probar todos sus endpoints a través del endpoint http://localhost:8000/d
 Podemos crear más endpoints, todos los que queramos. Por ejemplo, podemos tener uno para hacer predicciones en baches y otro para evaluar el modelo con un dataset de validación, pero esto lo dejo como ejercicio de práctica que deberán resolver por vuestra cuenta.
 
 ## Contenedorización
-- Crear imágen docker
+Si queremos desplegar nuestra API en la nube de una manera sencilla y sin preocuparnos por las dependencias, versiones y el entorno, una solución es utilizar Docker para encapsular nuestra API. Para ello, debemos tener Docker instalado en nuestro ordenador. Si estamos usando Windows, debemos tener ademas instalado el Linux Subsistem for Windows (LSW). Para instalar docker, pueden seguir las instrucciones de instalación en su [página web](https://docs.docker.com/engine/install/).
+
+Una vez instalado, procedemos a crear una imágen con nuestra API. Para ello, creamos un archivo `Dockerfile` sin extensión y con la primera letra mayúscula. Dentro, vamos a definir lo que necesitamos para ejecutar correctamente la API. Para nuestro caso, vamos a utilizar el siguiente Dockerfile:
+
+```Dockerfile
+FROM python:3.10-alpine
+
+WORKDIR /api
+
+COPY ./requirements.txt .
+
+RUN apk add --no-cache --virtual .build-deps \
+        gcc \
+        musl-dev && \
+    apk add --no-cache libffi-dev libressl-dev && \
+    pip install --no-cache-dir -r requirements.txt && \
+    apk del .build-deps
+
+RUN pip install uvicorn
+
+COPY . .
+
+EXPOSE 8000
+
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port 8000 --reload"]
+```
+
+Vamos a ir paso por paso para entender qué está pasando en este archivo. En primer lugar, estamos definiendo la imágen base con la palabra FROM. Esta imágen contiene todo lo necesario para construir un sistema operativo Alpine con Python 3.10 instalado:
+
+```Dockerfile
+FROM python:3.10-alpine
+```
+
+Podemos utilizar otros sistemas operativos y otras versiones de Python, todo lo que tenemos que hacer es explorar en [dockerhub]() las imágenes que nos interesen.
+
+Lo siguiente que estamos definiendo es un directorio `/app`. Con el comando `WORKDIR` estamos creando ese directorio y estamos navegando hacia él para trabajar dentro. Esto es opcional para una imágen tan sencilla como esta, pero recomendable hacerlo siempre para tener buenas prácticas:
+
+```Dockerfile
+FROM python:3.10-alpine
+
+WORKDIR /api
+```
+
+Ahora copiamos los contenidos del archivo `requirements.txt` que creamos antes a `.`, que es nuestro workdir:
+
+```Dockerfile
+FROM python:3.10-alpine
+
+WORKDIR /api
+
+COPY ./requirements.txt .
+```
+
+A continuación ejecutamos un comando para actualizar el sistema operativo, agregar dependencias temporales e instalar todas las librerías que tenemos en `requirements.txt`:
+
+```Dockerfile
+FROM python:3.10-alpine
+
+WORKDIR /api
+
+COPY ./requirements.txt .
+
+RUN apk add --no-cache --virtual .build-deps \
+        gcc \
+        musl-dev && \
+    apk add --no-cache libffi-dev libressl-dev && \
+    pip install --no-cache-dir -r requirements.txt && \
+    apk del .build-deps
+```
+
+Ahora instalamos Uvicorn:
+
+```Dockerfile
+FROM python:3.10-alpine
+
+WORKDIR /api
+
+COPY ./requirements.txt .
+
+RUN apk add --no-cache --virtual .build-deps \
+        gcc \
+        musl-dev && \
+    apk add --no-cache libffi-dev libressl-dev && \
+    pip install --no-cache-dir -r requirements.txt && \
+    apk del .build-deps
+
+RUN pip install uvicorn
+```
+
+Ahora que tenemos instaladas todas las dependencias, podemos copias los contenidos de nuestra API a la imágen. Si hay alguna carpeta o archivo que no queremos guardar en la imágen, por ejemplo nuestro entorno virtual `venv`, podemos añadirlos a un archivo `.dockerignrore`:
+
+```.dockerignore
+/venv/
+__pycache__/
+```
+
+```Dockerfile
+FROM python:3.10-alpine
+
+WORKDIR /api
+
+COPY ./requirements.txt .
+
+RUN apk add --no-cache --virtual .build-deps \
+        gcc \
+        musl-dev && \
+    apk add --no-cache libffi-dev libressl-dev && \
+    pip install --no-cache-dir -r requirements.txt && \
+    apk del .build-deps
+
+RUN pip install uvicorn
+
+COPY . .
+```
+
+Una vez todo lo necesario está dentro de la imágen, abrimos el puerto 8000, que es por el que se comunica Uvicorn cuando ejecutamos nuestro servidor:
+
+```Dockerfile
+FROM python:3.10-alpine
+
+WORKDIR /api
+
+COPY ./requirements.txt .
+
+RUN apk add --no-cache --virtual .build-deps \
+        gcc \
+        musl-dev && \
+    apk add --no-cache libffi-dev libressl-dev && \
+    pip install --no-cache-dir -r requirements.txt && \
+    apk del .build-deps
+
+RUN pip install uvicorn
+
+COPY . .
+
+EXPOSE 8000
+```
+
+Por último, especificamos el comando que se ha de ejecutar para iniciar el programa, en nuestro caso el servidor de Uvicorn:
+
+```Dockerfile
+FROM python:3.10-alpine
+
+WORKDIR /api
+
+COPY ./requirements.txt .
+
+RUN apk add --no-cache --virtual .build-deps \
+        gcc \
+        musl-dev && \
+    apk add --no-cache libffi-dev libressl-dev && \
+    pip install --no-cache-dir -r requirements.txt && \
+    apk del .build-deps
+
+RUN pip install uvicorn
+
+COPY . .
+
+EXPOSE 8000
+
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port 8000 --reload"]
+```
+
+Para comprobar que todo funciona correctamente, debemos construir la imágen a partir de Dockerfile y luego instancializar un contenedor. La imágen se construye con el siguiente comando:
+
+```sh
+docker build -t api .
+```
+
+Donde `-t api` nos sirve para especificar el nombre de la imágen y el `.` especifica el directorio en el que se encuentra el Dockerfile.
+
+Para instancializar un contenedor a partir de la imágen, ejecutamos:
+
+```sh
+docker run -p 8000:8000 api
+```
+
+Con `-p 8000:8000` estamos diciendo que vamos a enlazar el puerto 8000 del contenedor al puerto 8000 de nuestro ordenador. Esto nos permite comunicarnos con el contenedor de manera directa. Luego, `api` es simplemente el nombre de la imágen que hemos creado.
+
+Ahora deberiamos poder entrar en http://localhost:8000/ y ver nuestra API en funcionamiento.
 
 ## Despliegue
 - Usando Magnum y AWS Lambda
