@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
+from sklearn.ensemble import RandomForestRegressor
 
 from enum import Enum
 import datetime
@@ -35,13 +36,13 @@ async def root():
     return {'Hola': 'Mundo'}
 
 
-def cargar_modelo():
+def cargar_modelo() -> RandomForestRegressor:
     with open('model.pkl', 'br') as file:
         modelo = pkl.load(file)
     return modelo
 
 
-def cargar_encodings():
+def cargar_encodings() -> dict:
     with open('encodings.pkl', 'br') as file:
         encodings = pkl.load(file)
     return encodings

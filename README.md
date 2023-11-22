@@ -226,17 +226,18 @@ Ahora podemos cargar nuestro modelo:
 
 ```py
 import pickle as pkl
+from sklearn.ensemble import RandomForestRegressor
 
-def cargar_modelo():
+def cargar_modelo() -> RandomForestRegressor:
     with open('model.pkl', 'br') as file:
         modelo = pkl.load(file)
     return modelo
 ```
 
-Vamos a hacer también una función para cargar los encodings que utilizaremos para convertir nuestra campo de condición a un valor numérico que el modelo entienda bien.
+Vamos a hacer también una función para cargar los encodings que utilizaremos para convertir nuestro campo de condición a un valor numérico que el modelo entienda bien.
 
 ```py
-def cargar_encodings():
+def cargar_encodings() -> dict:
     with open('encodings.pkl', 'br') as file:
         encodings = pkl.load(file)
     return encodings
