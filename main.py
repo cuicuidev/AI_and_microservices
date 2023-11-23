@@ -65,3 +65,9 @@ async def ruta_prediccion(formulario: Formulario) -> Prediccion:
     timestamp = datetime.datetime.now().timestamp()
     prediccion = Prediccion(precio=precio, timestamp=timestamp)
     return prediccion
+
+@app.get('landing_page')
+async def landing_page():
+    with open('index.html') as file:
+        land = file.read()
+    return land
